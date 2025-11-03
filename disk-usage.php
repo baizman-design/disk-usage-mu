@@ -132,7 +132,7 @@ class mu_plugin {
 			}
 			$html .= '</div>';
 			date_default_timezone_set( timezoneId: 'America/New_York' );
-			$html .= sprintf('<p><small>As of %1$s.</small></p>',
+			$html .= sprintf('<p><small>Last updated %1$s.</small></p>',
 				date(
 					format: 'Y.m.d H.i',
 					timestamp: time(),
