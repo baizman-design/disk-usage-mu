@@ -59,64 +59,82 @@ class mu_plugin {
 	 */
 	public function admin_dashboard_widget():void
 	{
-		$uploads = wp_upload_dir(
-			create_dir: false,
+		$transient_name = 'bd_disk_usage_mu';
+		$disk_usage_transient = get_transient(
+			transient: $transient_name,
 		);
-		$core_directories = [
-			// plugins.
-			basename( path: WP_PLUGIN_DIR ),
-			// themes.
-			basename( path: dirname( get_stylesheet_directory() ) ),
-			// uploads.
-			basename( path: $uploads['basedir'] ?? 'uploads' ),
-		];
-		sort( $core_directories );
-		$optional_directories = [
-			'ai1wm-backups',
-			'updraft',
-		];
-		sort( $optional_directories );
-		$css = 'display:grid; grid-template-columns: 1fr 1fr;';
-		$html = sprintf('<div style="%1$s">',
-			$css,
-		);
-		$html .= '<div class="core-directories">';
-		$html .= sprintf( '<p><strong>%1$s</strong></p>',
-			'Core Directories',
-		);
-		$directories_formatted = array_map(
-			callback: [$this, '_format_directory'],
-			array: $core_directories,
-		);
-		$html .= '<ul>';
-		$html .= implode( $directories_formatted );
-		$html .= '</ul>';
-		$html .= '</div>';
-
-		$optional_directories_formatted = array_map(
-			callback: [$this, '_format_directory'],
-			array: $optional_directories,
-		);
-		// remove empty elements from array.
-		$optional_directories_formatted = array_filter($optional_directories_formatted);
-		if ( $optional_directories_formatted ) {
-			$optional_html = '<div class="optional-directories">';
-			$optional_html .= sprintf('<p><strong>%1$s</strong></p>',
-				'Optional Directories',
+		if ( $disk_usage_transient === false ) {
+			$uploads = wp_upload_dir(
+				create_dir: false,
 			);
-			$optional_html .= '<ul>';
-			$optional_html .= implode( $optional_directories_formatted );
-			$optional_html .= '</ul>';
-			$optional_html .= '</div>';
-			$html .= $optional_html;
+			$core_directories = [
+				// plugins.
+				basename( path: WP_PLUGIN_DIR ),
+				// themes.
+				basename( path: dirname( get_stylesheet_directory() ) ),
+				// uploads.
+				basename( path: $uploads['basedir'] ?? 'uploads' ),
+			];
+			sort( $core_directories );
+			$optional_directories = [
+				'ai1wm-backups',
+				'updraft',
+			];
+			sort( $optional_directories );
+			$css = 'display:grid; grid-template-columns: 1fr 1fr;';
+			$html = sprintf('<div style="%1$s">',
+				$css,
+			);
+			// left column.
+			$html .= '<div class="core-directories">';
+			$html .= sprintf( '<p><strong>%1$s</strong></p>',
+				'Core Directories',
+			);
+			$directories_formatted = array_map(
+				callback: [$this, '_format_directory'],
+				array: $core_directories,
+			);
+			$html .= '<ul>';
+			$html .= implode( $directories_formatted );
+			$html .= '</ul>';
+			// end left column.
+			$html .= '</div>';
+
+			$optional_directories_formatted = array_map(
+				callback: [$this, '_format_directory'],
+				array: $optional_directories,
+			);
+			// remove empty elements from array.
+			$optional_directories_formatted = array_filter($optional_directories_formatted);
+			if ( $optional_directories_formatted ) {
+				// right column.
+				$optional_html = '<div class="optional-directories">';
+				$optional_html .= sprintf('<p><strong>%1$s</strong></p>',
+					'Optional Directories',
+				);
+				$optional_html .= '<ul>';
+				$optional_html .= implode( $optional_directories_formatted );
+				$optional_html .= '</ul>';
+				// end right column.
+				$optional_html .= '</div>';
+				$html .= $optional_html;
+			}
+			$html .= '</div>';
+			date_default_timezone_set( timezoneId: 'America/New_York' );
+			$html .= sprintf('<p><small>As of %1$s.</small></p>',
+				date(
+					format: 'Y.m.d H.i',
+					timestamp: time(),
+				),
+			);
+			set_transient(
+				transient: $transient_name,
+				value: $html,
+				expiration: HOUR_IN_SECONDS,
+			);
+		} else {
+			$html = $disk_usage_transient;
 		}
-		$html .= '</div>';
-		$html .= sprintf('<p><small>As of %1$s.</small></p>',
-			date(
-				format: 'Y.m.d H.i',
-				timestamp: time(),
-			),
-		);
 		print( $html );
 	}
 
