@@ -62,7 +62,7 @@ class mu_plugin {
 		$uploads = wp_upload_dir(
 			create_dir: false,
 		);
-		$directories = [
+		$core_directories = [
 			// plugins.
 			basename( path: WP_PLUGIN_DIR ),
 			// themes.
@@ -70,26 +70,29 @@ class mu_plugin {
 			// uploads.
 			basename( path: $uploads['basedir'] ?? 'uploads' ),
 		];
-		sort( $directories );
+		sort( $core_directories );
 		$optional_directories = [
 			'ai1wm-backups',
 			'updraft',
 		];
 		sort( $optional_directories );
-		$html = sprintf( '<strong>%1$s</strong>',
+		$css = 'display:grid; grid-template-columns: 1fr 1fr;';
+		$html = sprintf('<div style="%1$s">',
+			$css,
+		);
+		$html .= '<div class="core-directories">';
+		$html .= sprintf( '<p><strong>%1$s</strong></p>',
 			'Core Directories',
 		);
 		$directories_formatted = array_map(
 			callback: [$this, '_format_directory'],
-			array: $directories,
+			array: $core_directories,
 		);
 		$html .= '<ul>';
 		$html .= implode( $directories_formatted );
 		$html .= '</ul>';
+		$html .= '</div>';
 
-		$optional_html = sprintf('<strong>%1$s</strong>',
-			'Optional Directories',
-		);
 		$optional_directories_formatted = array_map(
 			callback: [$this, '_format_directory'],
 			array: $optional_directories,
@@ -97,13 +100,22 @@ class mu_plugin {
 		// remove empty elements from array.
 		$optional_directories_formatted = array_filter($optional_directories_formatted);
 		if ( $optional_directories_formatted ) {
+			$optional_html = '<div class="optional-directories">';
+			$optional_html .= sprintf('<p><strong>%1$s</strong></p>',
+				'Optional Directories',
+			);
 			$optional_html .= '<ul>';
 			$optional_html .= implode( $optional_directories_formatted );
 			$optional_html .= '</ul>';
+			$optional_html .= '</div>';
 			$html .= $optional_html;
 		}
+		$html .= '</div>';
 		$html .= sprintf('<p><small>As of %1$s.</small></p>',
-			date('Y.m.d H.i', time()),
+			date(
+				format: 'Y.m.d H.i',
+				timestamp: time(),
+			),
 		);
 		print( $html );
 	}
