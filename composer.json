@@ -1,0 +1,25 @@
+{
+    "name": "baizman-design/disk-usage-mu",
+    "description": "A WordPress must-use plugin displaying disk usage.",
+    "homepage": "https://github.com/baizman-design/disk-usage-mu",
+    "type": "wordpress-plugin",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "wordpress",
+        "plugin",
+        "php"
+    ],
+    "authors": [
+        {
+            "name": "Saul Baizman",
+            "email": "saul@baizmandesign.com",
+            "homepage": "https://baizmandesign.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/baizman-design/disk-usage-mu/issues/new"
+    },
+    "require": {
+        "php": "8.*"
+    }
+}
