@@ -20,6 +20,6 @@
         "issues": "https://github.com/baizman-design/disk-usage-mu/issues/new"
     },
     "require": {
-        "php": "8.*"
+        "php": "8.*.*"
     }
 }
