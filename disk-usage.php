@@ -76,29 +76,40 @@ class mu_plugin {
 				basename( path: $uploads['basedir'] ?? 'uploads' ),
 			];
 			sort( $core_directories );
+			// mu-plugins, always at the end.
+			$core_directories[] = basename( path: WPMU_PLUGIN_DIR );
 			$optional_directories = [
 				'ai1wm-backups',
 				'updraft',
 			];
 			sort( $optional_directories );
-			$css = 'display:grid; grid-template-columns: 1fr 1fr;';
-			$html = sprintf('<div style="%1$s">',
+			$css  = 'display:grid; grid-template-columns: 1fr 1fr;';
+			$html = sprintf( '<div style="%1$s">',
 				$css,
 			);
 			// left column.
-			$html .= '<div class="core-directories">';
-			$html .= sprintf( '<p><strong>%1$s</strong></p>',
-				'Core Directories',
-			);
-			$directories_formatted = array_map(
-				callback: [$this, '_format_directory'],
+			$core_directories_formatted = array_map(
+				callback: [ $this, '_format_directory' ],
 				array: $core_directories,
 			);
-			$html .= '<ul>';
-			$html .= implode( $directories_formatted );
-			$html .= '</ul>';
-			// end left column.
-			$html .= '</div>';
+			// core
+			$core_directories_formatted = array_filter( $core_directories_formatted );
+			if ( $core_directories_formatted ) {
+				$html .= '<div class="core-directories">';
+				$html .= sprintf( '<p><strong>%1$s</strong></p>',
+					'Core Directories',
+				);
+				$html .= '<ul>';
+				$html .= implode( $core_directories_formatted );
+				$html .= '</ul>';
+				// end left column.
+				$html .= '</div>';
+			} else {
+				printf('<p><strong>Error:</strong> %1$s</p>',
+					wptexturize( text: 'The "du" command was not found or could not be run.' ),
+				);
+				return;
+			}
 
 			$optional_directories_formatted = array_map(
 				callback: [$this, '_format_directory'],
@@ -149,16 +160,28 @@ class mu_plugin {
 		string $directory,
 	):string
 	{
-		$command = 'du -sh';
+		$command = 'du';
+		$arguments = [
+			's', // summary.
+			'h', // human-readable.
+			];
 		$directory_path = sprintf('%1$s/%2$s',
 			WP_CONTENT_DIR,
 			$directory,
 		);
 		if ( file_exists( filename: $directory_path ) ) {
 			$exec = exec(
-				command: $command . ' ' . $directory_path,
+				command: sprintf('%1$s -%2$s %3$s',
+					$command,
+					implode( $arguments ),
+					$directory_path,
+				),
 				output: $output,
 			);
+			// no output, or the "du" command is not found.
+			if ( empty( $exec )) {
+				return '';
+			}
 			list ( $disk_usage ) = explode(
 				separator: "\t",
 				string: $output[0],
