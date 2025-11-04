@@ -83,7 +83,7 @@ class mu_plugin {
 					separator: "\t",
 					string: $details
 				);
-				$subdirectories_array[$directory] = $size;
+				$subdirectories_array[$directory] = trim( $size );
 			}
 			// filter out non-directories.
 			$subdirectories_array = array_filter(
@@ -93,7 +93,15 @@ class mu_plugin {
 				},
 				ARRAY_FILTER_USE_BOTH
 			);
-			// find actual core directories.
+			// filter out empty directories.
+			$subdirectories_array = array_filter(
+				$subdirectories_array,
+				function ( $size, $subdirectory ) {
+					return $size != '0B'; // zero bytes.
+				},
+				ARRAY_FILTER_USE_BOTH
+			);
+			// find core directories.
 			$core_directories = array_filter(
 				$subdirectories_array,
 				function( $size, $subdirectory ) use ( $core_directories_default ) {
