@@ -100,9 +100,14 @@ class mu_plugin {
 			$subdirectories_array = array_filter(
 				$subdirectories_array,
 				function ( $size, $subdirectory ) {
-					return $size != '0B'; // zero bytes.
+					return $size != '0'; // zero bytes.
 				},
 				ARRAY_FILTER_USE_BOTH
+			);
+			// sort the array in descending order based on the key's value.
+			arsort(
+				array: $subdirectories_array,
+				flags: SORT_NUMERIC
 			);
 			// find core directories.
 			$core_directories = array_filter(
@@ -197,7 +202,7 @@ class mu_plugin {
 		$command = 'du';
 		$arguments = [
 			's', // summary.
-			'h', // human-readable.
+			//'h', // human-readable.
 			];
 		$directory_path = $directory;
 		if ( file_exists( filename: $directory_path ) ) {
@@ -221,19 +226,28 @@ class mu_plugin {
 	/**
 	 * Format each directory entry as an HTML list item.
 	 *
+	 * @link https://stackoverflow.com/questions/59442474/print-in-bytes-with-du
+	 *
 	 * @param string $directory
 	 * @param string $size
+	 * @param bool $use_du_compensation
 	 *
 	 * @return string
 	 */
 	private function _format_directory_entry(
 		string $directory,
 		string $size,
+		bool $use_du_compensation = true,
 	):string
 	{
+		// we can't get the directory in bytes on macOS. see the "du" man page.
+		$du_compensation = 1;
+		if ( $use_du_compensation ) {
+			$du_compensation = 512;
+		}
 		return sprintf('<li>+ %1$s &mdash; %2$s</li>',
 			basename( path: $directory ),
-			$size,
+			size_format( bytes: $size * $du_compensation ),
 		);
 	}
 
