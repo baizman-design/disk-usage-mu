@@ -173,7 +173,7 @@ class mu_plugin {
 	}
 
 	/**
-	 * Format directory.
+	 * Get the disk usage of the subdirectories of a given directory.
 	 *
 	 * @param string $directory
 	 *
@@ -207,9 +207,17 @@ class mu_plugin {
 		return [];
 	}
 
+	/**
+	 * Format each directory entry as an HTML list item.
+	 *
+	 * @param string $directory
+	 * @param string $size
+	 *
+	 * @return string
+	 */
 	private function _format_directory_entry(
-		$directory,
-		$size,
+		string $directory,
+		string $size,
 	):string
 	{
 		return sprintf('<li>+ %1$s &mdash; %2$s</li>',
