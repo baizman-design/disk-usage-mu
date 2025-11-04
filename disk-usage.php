@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Plugin Name: Disk Usage
- * Plugin URI: https://github.com/baizman-design/disk-usage-mu
- * Description: A WordPress must-use plugin displaying disk usage.
+ * Plugin Name:   Disk Usage
+ * Plugin URI:    https://github.com/baizman-design/disk-usage-mu
+ * Description:   A WordPress must-use plugin displaying disk usage.
  * Author:        Saul Baizman
  * Author URI:    https://baizmandesign.com
  * Version:       1.0.0
