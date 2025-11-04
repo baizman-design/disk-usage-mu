@@ -13,6 +13,14 @@ namespace disk_usage_mu;
 
 class mu_plugin {
 
+	// operating system.
+	private string $os = '';
+	private array $supported_systems = [
+		'Darwin', // macOS
+		'Linux',
+		'FreeBSD',
+	];
+
 	/**
 	 * Add WordPress hook.
 	 *
@@ -21,11 +29,17 @@ class mu_plugin {
 	public static function run():void
 	{
 		$self = new self();
-		// add custom dashboard widget (visible only to admins).
-		add_action(
-			hook_name: 'wp_dashboard_setup',
-			callback: [$self, 'add_admin_dashboard_widget'],
+		// FIXME (maybe): move to add_admin_dashboard_widget()?
+		$self->os = php_uname(
+			mode: 's',
 		);
+		if ( in_array ( needle: $self->os, haystack: $self->supported_systems ) ) {
+			// add custom dashboard widget (visible only to admins).
+			add_action(
+				hook_name: 'wp_dashboard_setup',
+				callback: [$self, 'add_admin_dashboard_widget'],
+			);
+		}
 	}
 
 	/**
@@ -184,7 +198,7 @@ class mu_plugin {
 			date_default_timezone_set( timezoneId: 'America/New_York' );
 			$now = current_datetime();
 			$html .= sprintf('<p><small>Last updated at %1$s on %2$s.</small></p>',
-				$now->format( format: 'H.i' ), // time
+				$now->format( format: 'G.i' ), // time
 				$now->format( format: 'Y.m.d' ), // date
 			);
 			set_transient(
@@ -212,8 +226,7 @@ class mu_plugin {
 		$command = 'du';
 		$arguments = [
 			's', // summary.
-			//'h', // human-readable.
-			];
+		];
 		$directory_path = $directory;
 		if ( file_exists( filename: $directory_path ) ) {
 			$exec = exec(
@@ -240,24 +253,22 @@ class mu_plugin {
 	 *
 	 * @param string $directory
 	 * @param string $size
-	 * @param bool $use_du_compensation
 	 *
 	 * @return string
 	 */
 	private function _format_directory_entry(
 		string $directory,
 		string $size,
-		bool $use_du_compensation = true,
 	):string
 	{
 		// we can't get the directory in bytes on macOS. see the "du" man page.
-		$du_compensation = 1;
-		if ( $use_du_compensation ) {
-			$du_compensation = 512;
+		$du_multiplier = 1024;
+		if ( $this->os == 'Darwin' ) {
+			$du_multiplier = 512;
 		}
 		list ( $amount, $unit ) = explode(
 			separator: ' ',
-			string: size_format( bytes: $size * $du_compensation )
+			string: size_format( bytes: $size * $du_multiplier )
 		);
 		return sprintf('<li>+ %1$s &mdash; %2$s%3$s</li>',
 			basename( path: $directory ),
