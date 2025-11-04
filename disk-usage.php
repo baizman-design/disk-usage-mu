@@ -67,34 +67,61 @@ class mu_plugin {
 			$uploads = wp_upload_dir(
 				create_dir: false,
 			);
-			$core_directories = [
+			$core_directories_default = [
 				// plugins.
 				basename( path: WP_PLUGIN_DIR ),
 				// themes.
 				basename( path: dirname( get_stylesheet_directory() ) ),
 				// uploads.
 				basename( path: $uploads['basedir'] ?? 'uploads' ),
+				// mu-plugins.
+				basename( path: WPMU_PLUGIN_DIR ),
 			];
-			sort( $core_directories );
-			// mu-plugins, always at the end.
-			$core_directories[] = basename( path: WPMU_PLUGIN_DIR );
-			$optional_directories = [
-				'ai1wm-backups',
-				'updraft',
-			];
-			sort( $optional_directories );
-			$css  = 'display:grid; grid-template-columns: 1fr 1fr;';
+			$wp_content_subdirectories = $this->_get_subdirectory_disk_usage( directory: WP_CONTENT_DIR );
+			$subdirectories_array = [];
+			// reformat array.
+			foreach ( $wp_content_subdirectories as $subdirectory => $details) {
+				list( $size, $directory ) = explode(
+					separator: "\t",
+					string: $details
+				);
+				$subdirectories_array[$directory] = $size;
+			}
+			// filter out non-directories.
+			$subdirectories_array = array_filter(
+				$subdirectories_array,
+				function ( $size, $maybe_subdirectory ){
+					return is_dir( filename: $maybe_subdirectory ) ;
+				},
+				ARRAY_FILTER_USE_BOTH
+			);
+			// find actual core directories.
+			$core_directories = array_filter(
+				$subdirectories_array,
+				function( $size, $subdirectory ) use ( $core_directories_default ) {
+					return in_array( needle: basename( $subdirectory ), haystack: $core_directories_default );
+				},
+				ARRAY_FILTER_USE_BOTH
+			);
+			// find non-core directories.
+			$other_directories = array_filter(
+				$subdirectories_array,
+				function( $size, $subdirectory ) use ( $core_directories_default ) {
+					return ! in_array( needle: basename( $subdirectory ), haystack: $core_directories_default );
+				},
+				ARRAY_FILTER_USE_BOTH
+			);
+			$css = 'display:grid; grid-template-columns: 1fr 1fr;';
 			$html = sprintf( '<div style="%1$s">',
 				$css,
 			);
-			// left column.
 			$core_directories_formatted = array_map(
-				callback: [ $this, '_format_directory' ],
-				array: $core_directories,
+				[$this, '_format_directory_entry'],
+				array_keys( $core_directories ),
+				array_values( $core_directories ),
 			);
-			// core
-			$core_directories_formatted = array_filter( $core_directories_formatted );
 			if ( $core_directories_formatted ) {
+				// left column.
 				$html .= '<div class="core-directories">';
 				$html .= sprintf( '<p><strong>%1$s</strong></p>',
 					'Core Directories',
@@ -110,21 +137,19 @@ class mu_plugin {
 				);
 				return;
 			}
-
-			$optional_directories_formatted = array_map(
-				callback: [$this, '_format_directory'],
-				array: $optional_directories,
+			$other_directories_formatted = array_map(
+				[$this, '_format_directory_entry'],
+				array_keys( $other_directories ),
+				array_values( $other_directories ),
 			);
-			// remove empty elements from array.
-			$optional_directories_formatted = array_filter($optional_directories_formatted);
-			if ( $optional_directories_formatted ) {
+			if ( $other_directories_formatted ) {
 				// right column.
-				$optional_html = '<div class="optional-directories">';
+				$optional_html = '<div class="other-directories">';
 				$optional_html .= sprintf('<p><strong>%1$s</strong></p>',
-					'Optional Directories',
+					'Other Directories',
 				);
 				$optional_html .= '<ul>';
-				$optional_html .= implode( $optional_directories_formatted );
+				$optional_html .= implode( $other_directories_formatted );
 				$optional_html .= '</ul>';
 				// end right column.
 				$optional_html .= '</div>';
@@ -154,24 +179,21 @@ class mu_plugin {
 	 *
 	 * @param string $directory
 	 *
-	 * @return string
+	 * @return array
 	 */
-	private function _format_directory(
+	private function _get_subdirectory_disk_usage(
 		string $directory,
-	):string
+	):array
 	{
 		$command = 'du';
 		$arguments = [
 			's', // summary.
 			'h', // human-readable.
 			];
-		$directory_path = sprintf('%1$s/%2$s',
-			WP_CONTENT_DIR,
-			$directory,
-		);
+		$directory_path = $directory;
 		if ( file_exists( filename: $directory_path ) ) {
 			$exec = exec(
-				command: sprintf('%1$s -%2$s %3$s',
+				command: sprintf('%1$s -%2$s %3$s/*',
 					$command,
 					implode( $arguments ),
 					$directory_path,
@@ -180,18 +202,22 @@ class mu_plugin {
 			);
 			// no output, or the "du" command is not found.
 			if ( empty( $exec )) {
-				return '';
+				return [];
 			}
-			list ( $disk_usage ) = explode(
-				separator: "\t",
-				string: $output[0],
-			);
-			return sprintf('<li>+ %1$s: %2$s</li>',
-				$directory,
-				$disk_usage,
-			);
+			return $output;
 		}
-		return '';
+		return [];
+	}
+
+	private function _format_directory_entry(
+		$directory,
+		$size,
+	):string
+	{
+		return sprintf('<li>+ %1$s &mdash; %2$s</li>',
+			basename( path: $directory ),
+			$size,
+		);
 	}
 
 }
