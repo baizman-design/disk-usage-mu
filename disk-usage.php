@@ -182,11 +182,10 @@ class mu_plugin {
 			}
 			$html .= '</div>';
 			date_default_timezone_set( timezoneId: 'America/New_York' );
-			$html .= sprintf('<p><small>Last updated %1$s.</small></p>',
-				date(
-					format: 'Y.m.d H.i',
-					timestamp: time(),
-				),
+			$now = current_datetime();
+			$html .= sprintf('<p><small>Last updated at %1$s on %2$s.</small></p>',
+				$now->format( format: 'H.i' ), // time
+				$now->format( format: 'Y.m.d' ), // date
 			);
 			set_transient(
 				transient: $transient_name,
@@ -256,9 +255,19 @@ class mu_plugin {
 		if ( $use_du_compensation ) {
 			$du_compensation = 512;
 		}
-		return sprintf('<li>+ %1$s &mdash; %2$s</li>',
+		list ( $amount, $unit ) = explode(
+			separator: ' ',
+			string: size_format( bytes: $size * $du_compensation )
+		);
+		return sprintf('<li>+ %1$s &mdash; %2$s%3$s</li>',
 			basename( path: $directory ),
-			size_format( bytes: $size * $du_compensation ),
+			$amount,
+			// get first character of unit.
+			substr(
+				string: $unit,
+				offset: 0,
+				length: 1
+			),
 		);
 	}
 
