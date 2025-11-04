@@ -9,8 +9,6 @@
  * Version:       1.0.0
  */
 
-// TODO: check if "du" command is present.
-
 namespace disk_usage_mu;
 
 class mu_plugin {
