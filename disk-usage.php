@@ -77,14 +77,17 @@ class mu_plugin {
 			];
 			$wp_content_subdirectories = $this->_get_subdirectory_disk_usage( directory: WP_CONTENT_DIR );
 			$subdirectories_array = [];
-			// reformat array.
-			foreach ( $wp_content_subdirectories as $subdirectory => $details) {
-				list( $size, $directory ) = explode(
-					separator: "\t",
-					string: $details
-				);
-				$subdirectories_array[$directory] = trim( $size );
-			}
+			// reformat array from "0 => 3M\t/path/to/dir" to "/path/to/dir => 3M".
+			array_map(
+				function ( $subdirectory_entry ) use ( &$subdirectories_array ) {
+					list( $size, $directory ) = explode(
+						separator: "\t",
+						string: $subdirectory_entry
+					);
+					$subdirectories_array[$directory] = trim( $size );
+				},
+				$wp_content_subdirectories,
+			);
 			// filter out non-directories.
 			$subdirectories_array = array_filter(
 				$subdirectories_array,
