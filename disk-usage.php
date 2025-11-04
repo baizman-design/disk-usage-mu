@@ -125,9 +125,20 @@ class mu_plugin {
 				},
 				ARRAY_FILTER_USE_BOTH
 			);
-			$css = 'display:grid; grid-template-columns: 1fr 1fr;';
+			$css = [
+				'display' => 'grid',
+				'grid-template-columns' => '1fr 1fr',
+				'grid-gap' => '20px',
+			];
 			$html = sprintf( '<div style="%1$s">',
-				$css,
+				implode( separator: '; ', array: array_map(
+					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
+						$property,
+						$value
+					),
+					array_keys( $css ),
+					array_values( $css )
+				)),
 			);
 			$core_directories_formatted = array_map(
 				[$this, '_format_directory_entry'],
