@@ -195,6 +195,20 @@ class mu_plugin {
 				$html .= $optional_html;
 			}
 			$html .= '</div>';
+			// sum the total.
+			$total_bytes = 0;
+			array_map(
+				callback: function ( $subdirectory_size ) use ( &$total_bytes ) {
+					$total_bytes += $subdirectory_size;
+				},
+				array: $subdirectories_array,
+			);
+			$html .= sprintf('<p><strong>total:</strong> %1$s</p>',
+				$this->_reformat_size_format(
+					size: $total_bytes,
+					decimals: 2,
+				),
+			);
 			date_default_timezone_set( timezoneId: 'America/New_York' );
 			$now = current_datetime();
 			$html .= sprintf('<p><small>Last updated at %1$s on %2$s.</small></p>',
@@ -227,13 +241,12 @@ class mu_plugin {
 		$arguments = [
 			's', // summary.
 		];
-		$directory_path = $directory;
-		if ( file_exists( filename: $directory_path ) ) {
+		if ( file_exists( filename: $directory ) ) {
 			$exec = exec(
 				command: sprintf('%1$s -%2$s %3$s/*',
 					$command,
 					implode( $arguments ),
-					$directory_path,
+					$directory,
 				),
 				output: $output,
 			);
@@ -261,6 +274,29 @@ class mu_plugin {
 		string $size,
 	):string
 	{
+		return sprintf('<li>+ %1$s &mdash; %2$s</li>',
+			basename(
+				path: $directory
+			),
+			$this->_reformat_size_format(
+				size: $size
+			),
+		);
+	}
+
+	/**
+	 * Reformat the return value of size_format(). Example: "5 MB" => "5M".
+	 *
+	 * @param string $size
+	 * @param int $decimals
+	 *
+	 * @return string
+	 */
+	private function _reformat_size_format(
+		string $size,
+		int $decimals = 0,
+	):string
+	{
 		// we can't get the directory in bytes on macOS. see the "du" man page.
 		$du_multiplier = 1024;
 		if ( $this->os == 'Darwin' ) {
@@ -268,17 +304,14 @@ class mu_plugin {
 		}
 		list ( $amount, $unit ) = explode(
 			separator: ' ',
-			string: size_format( bytes: $size * $du_multiplier )
+			string: size_format(
+				bytes: $size * $du_multiplier,
+				decimals: $decimals,
+			)
 		);
-		return sprintf('<li>+ %1$s &mdash; %2$s%3$s</li>',
-			basename( path: $directory ),
+		return sprintf('%1$s%2$s',
 			$amount,
-			// get first character of unit.
-			substr(
-				string: $unit,
-				offset: 0,
-				length: 1
-			),
+			$unit[0], // get first character.
 		);
 	}
 
