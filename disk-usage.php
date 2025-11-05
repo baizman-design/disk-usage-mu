@@ -13,7 +13,7 @@ namespace disk_usage_mu;
 
 class mu_plugin {
 
-	// operating system.
+	// current operating system.
 	private string $os = '';
 	private array $supported_systems = [
 		'Darwin', // macOS
@@ -32,10 +32,8 @@ class mu_plugin {
 	public static function run():void
 	{
 		$self = new self();
+		$self->set_os();
 		// FIXME (maybe): move to add_admin_dashboard_widget()?
-		$self->os = php_uname(
-			mode: 's',
-		);
 		if ( in_array ( needle: $self->os, haystack: $self->supported_systems ) ) {
 			// add custom dashboard widget (visible only to admins).
 			add_action(
@@ -43,6 +41,18 @@ class mu_plugin {
 				callback: [$self, 'add_admin_dashboard_widget'],
 			);
 		}
+	}
+
+	/**
+	 * Set the operating system name.
+	 *
+	 * @return void
+	 */
+	private function set_os():void
+	{
+		$this->os = php_uname(
+			mode: 's',
+		);
 	}
 
 	/**
@@ -326,5 +336,7 @@ class mu_plugin {
 	}
 
 }
-
-mu_plugin::run();
+// decouple from WordPress.
+if ( defined( constant_name: 'ABSPATH' ) ) {
+	mu_plugin::run();
+}
