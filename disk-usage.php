@@ -21,6 +21,9 @@ class mu_plugin {
 		'FreeBSD',
 	];
 
+	// URL key in the GET request.
+	private string $get_url_key = 'refresh-disk-usage-transient';
+
 	/**
 	 * Add WordPress hook.
 	 *
@@ -75,6 +78,9 @@ class mu_plugin {
 		$disk_usage_transient = get_transient(
 			transient: $transient_name,
 		);
+		if ( isset( $_GET[$this->get_url_key] ) ) {
+			$disk_usage_transient = false;
+		}
 		if ( $disk_usage_transient === false ) {
 			$uploads = wp_upload_dir(
 				create_dir: false,
@@ -211,9 +217,13 @@ class mu_plugin {
 			);
 			date_default_timezone_set( timezoneId: 'America/New_York' );
 			$now = current_datetime();
-			$html .= sprintf('<p><small>Last updated at %1$s on %2$s.</small></p>',
+			$html .= sprintf('<p><small>Last updated at %1$s on %2$s. (<a href="%3$s">refresh</a>)</small></p>',
 				$now->format( format: 'G.i' ), // time
 				$now->format( format: 'Y.m.d' ), // date
+				add_query_arg(
+					[$this->get_url_key => 1],
+					admin_url(),
+				),
 			);
 			set_transient(
 				transient: $transient_name,
