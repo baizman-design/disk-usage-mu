@@ -15,6 +15,8 @@ class mu_plugin {
 
 	// current operating system.
 	private string $os = '';
+
+	// supported operating systems.
 	private array $supported_systems = [
 		'Darwin', // macOS
 		'Linux',
@@ -236,7 +238,7 @@ class mu_plugin {
 				$now->format( format: 'Y.m.d' ), // date
 				add_query_arg(
 					[$this->get_url_key => 1],
-					admin_url(),
+					admin_url(), // not actually required, here to be explicit.
 				),
 			);
 			set_transient(
