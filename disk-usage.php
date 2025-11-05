@@ -24,6 +24,10 @@ class mu_plugin {
 	// URL key in the GET request.
 	private string $get_url_key = 'refresh-disk-usage-transient';
 
+	// transient duration.
+	// note: using the constant couples this to WordPress.
+	private const transient_duration = HOUR_IN_SECONDS;
+
 	/**
 	 * Add WordPress hook.
 	 *
@@ -238,7 +242,7 @@ class mu_plugin {
 			set_transient(
 				transient: $transient_name,
 				value: $html,
-				expiration: HOUR_IN_SECONDS,
+				expiration: self::transient_duration,
 			);
 		} else {
 			$html = $disk_usage_transient;
