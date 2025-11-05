@@ -169,6 +169,34 @@ class mu_plugin {
 				'grid-template-columns' => '1fr 1fr',
 				'grid-gap' => '20px',
 			];
+			// css formatting.
+			$data_css = [
+				'font-size' => '20px',
+				'font-weight' => 'bold',
+			];
+			$data_css_string = implode( separator: '; ', array: array_map(
+					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
+						$property,
+						$value
+					),
+					array_keys( $data_css ),
+					array_values( $data_css ),
+				)
+			);
+			$label_css = [
+				'font-size' => '10px',
+				'text-transform' => 'uppercase',
+				'letter-spacing' => '0.05em',
+			];
+			$label_css_string = implode( separator: '; ', array: array_map(
+					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
+						$property,
+						$value
+					),
+					array_keys( $label_css ),
+					array_values( $label_css ),
+				)
+			);
 			$html = sprintf( '<div style="%1$s">',
 				implode( separator: '; ', array: array_map(
 					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
@@ -183,6 +211,16 @@ class mu_plugin {
 				[$this, '_format_directory_entry'],
 				array_keys( $core_directories ),
 				array_values( $core_directories ),
+				array_fill(
+					0,
+					count($core_directories),
+					$label_css_string
+				),
+				array_fill(
+					0,
+					count($core_directories),
+					$data_css_string
+				),
 			);
 			if ( $core_directories_formatted ) {
 				// left column.
@@ -190,9 +228,7 @@ class mu_plugin {
 				$html .= sprintf( '<p><strong>%1$s</strong></p>',
 					'Core Directories',
 				);
-				$html .= '<ul>';
 				$html .= implode( $core_directories_formatted );
-				$html .= '</ul>';
 				// end left column.
 				$html .= '</div>';
 			} else {
@@ -205,6 +241,16 @@ class mu_plugin {
 				[$this, '_format_directory_entry'],
 				array_keys( $other_directories ),
 				array_values( $other_directories ),
+				array_fill(
+					0,
+					count($other_directories),
+					$label_css_string
+				),
+				array_fill(
+					0,
+					count($other_directories),
+					$data_css_string
+				),
 			);
 			if ( $other_directories_formatted ) {
 				// right column.
@@ -212,9 +258,7 @@ class mu_plugin {
 				$optional_html .= sprintf('<p><strong>%1$s</strong></p>',
 					'Other Directories',
 				);
-				$optional_html .= '<ul>';
 				$optional_html .= implode( $other_directories_formatted );
-				$optional_html .= '</ul>';
 				// end right column.
 				$optional_html .= '</div>';
 				$html .= $optional_html;
@@ -228,38 +272,13 @@ class mu_plugin {
 				},
 				array: $subdirectories_array,
 			);
-			$total_css = [
-				'font-size' => '20px',
-				'font-weight' => 'bold',
-			];
-			$total_css_string = implode( separator: '; ', array: array_map(
-					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
-						$property,
-						$value
-					),
-					array_keys( $total_css ),
-					array_values( $total_css ),
-				));
-			$total_label_css = [
-				'font-size' => '10px',
-				'text-transform' => 'uppercase',
-				'letter-spacing' => '0.05em',
-			];
-			$total_label_css_string = implode( separator: '; ', array: array_map(
-					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
-						$property,
-						$value
-					),
-					array_keys( $total_label_css ),
-					array_values( $total_label_css ),
-				));
 			$html .= sprintf('<p><span style="%2$s">%1$s</span><br><span style="%3$s">%4$s</span></p>',
 				$this->_reformat_size_format(
 					size: $total_bytes,
 					decimals: 2,
 				),
-				$total_css_string,
-				$total_label_css_string,
+				$data_css_string,
+				$label_css_string,
 				__( text: 'total disk usage in', domain: 'disk_usage_mu' ) . ' ' . basename( path: WP_CONTENT_DIR ),
 			);
 			/*
@@ -330,21 +349,27 @@ class mu_plugin {
 	 *
 	 * @param string $directory
 	 * @param string $size
+	 * @param string $label_css
+	 * @param string $data_css
 	 *
 	 * @return string
 	 */
 	private function _format_directory_entry(
 		string $directory,
 		string $size,
+		string $label_css = '',
+		string $data_css = '',
 	):string
 	{
-		return sprintf('<li>+ %1$s &mdash; %2$s</li>',
+		return sprintf('<p><span style="%3$s">%2$s</span><br><span style="%4$s">%1$s</span></p>',
 			basename(
 				path: $directory
 			),
 			$this->_reformat_size_format(
 				size: $size
 			),
+			$data_css,
+			$label_css,
 		);
 	}
 
