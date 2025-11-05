@@ -161,7 +161,7 @@ class mu_plugin {
 				},
 				ARRAY_FILTER_USE_BOTH
 			);
-			$css = [
+			$meta_box_css = [
 				'display' => 'grid',
 				'grid-template-columns' => '1fr 1fr',
 				'grid-gap' => '20px',
@@ -172,8 +172,8 @@ class mu_plugin {
 						$property,
 						$value
 					),
-					array_keys( $css ),
-					array_values( $css )
+					array_keys( $meta_box_css ),
+					array_values( $meta_box_css ),
 				)),
 			);
 			$core_directories_formatted = array_map(
@@ -225,12 +225,47 @@ class mu_plugin {
 				},
 				array: $subdirectories_array,
 			);
-			$html .= sprintf('<p><strong>total:</strong> %1$s</p>',
+			$total_css = [
+				'font-size' => '20px',
+				'font-weight' => 'bold',
+			];
+			$total_css_string = implode( separator: '; ', array: array_map(
+					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
+						$property,
+						$value
+					),
+					array_keys( $total_css ),
+					array_values( $total_css ),
+				));
+			$total_label_css = [
+				'font-size' => '10px',
+				'text-transform' => 'uppercase',
+				'letter-spacing' => '0.05em',
+			];
+			$total_label_css_string = implode( separator: '; ', array: array_map(
+					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
+						$property,
+						$value
+					),
+					array_keys( $total_label_css ),
+					array_values( $total_label_css ),
+				));
+			$html .= sprintf('<p><span style="%2$s">%1$s</span><br><span style="%3$s">%4$s</span></p>',
 				$this->_reformat_size_format(
 					size: $total_bytes,
 					decimals: 2,
 				),
+				$total_css_string,
+				$total_label_css_string,
+				__( text: 'total disk usage in', domain: 'disk_usage_mu' ) . ' ' . basename( path: WP_CONTENT_DIR ),
 			);
+			/*
+			$html .= sprintf('<p><span style="%2$s">%1$s</span><br><span style="%3$s">wp-content directory path</span></p>',
+				WP_CONTENT_DIR,
+				$total_css_string,
+				$total_label_css_string,
+			);
+			*/
 			date_default_timezone_set( timezoneId: 'America/New_York' );
 			$now = current_datetime();
 			$html .= sprintf('<p><small>Last updated at %1$s on %2$s. (<a href="%3$s">refresh</a>)</small></p>',
