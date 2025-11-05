@@ -30,6 +30,9 @@ class mu_plugin {
 	// note: using the constant couples this to WordPress.
 	private const transient_duration = HOUR_IN_SECONDS;
 
+	// timezone.
+	private const timezone = 'America/New_York';
+
 	/**
 	 * Add WordPress hook.
 	 *
@@ -266,7 +269,7 @@ class mu_plugin {
 				$total_label_css_string,
 			);
 			*/
-			date_default_timezone_set( timezoneId: 'America/New_York' );
+			date_default_timezone_set( timezoneId: self::timezone );
 			$now = current_datetime();
 			$html .= sprintf('<p><small>Last updated at %1$s on %2$s. (<a href="%3$s">refresh</a>)</small></p>',
 				$now->format( format: 'G.i' ), // time
