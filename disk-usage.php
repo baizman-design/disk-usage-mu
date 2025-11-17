@@ -33,7 +33,7 @@ class mu_plugin {
 
 	// transient duration.
 	// note: using the constant couples this to WordPress.
-	private const transient_duration = HOUR_IN_SECONDS;
+	private const transient_duration = WEEK_IN_SECONDS;
 
 	// timezone.
 	private const timezone = 'America/New_York';
