@@ -6,7 +6,12 @@
  * Description:   A WordPress must-use plugin displaying disk usage.
  * Author:        Saul Baizman
  * Author URI:    https://baizmandesign.com
+ * Text Domain:   disk-usage
  * Version:       1.0.0
+ * Domain Path:   /languages
+ * Version:       1.0.0
+ *
+ * @package       Baizman_Design_Disk_Usage
  */
 
 namespace disk_usage_mu;
@@ -279,7 +284,7 @@ class mu_plugin {
 				),
 				$data_css_string,
 				$label_css_string,
-				__( text: 'total disk usage in', domain: 'disk_usage_mu' ) . ' ' . basename( path: WP_CONTENT_DIR ),
+				__( text: 'total disk usage in', domain: 'disk-usage' ) . ' ' . basename( path: WP_CONTENT_DIR ),
 			);
 			/*
 			$html .= sprintf('<p><span style="%2$s">%1$s</span><br><span style="%3$s">wp-content directory path</span></p>',
@@ -290,6 +295,7 @@ class mu_plugin {
 			*/
 			date_default_timezone_set( timezoneId: self::timezone );
 			$now = current_datetime();
+			/** @noinspection HtmlUnknownTarget */
 			$html .= sprintf('<p><small>Last updated at %1$s on %2$s. (<a href="%3$s">refresh</a>)</small></p>',
 				$now->format( format: 'G.i' ), // time
 				$now->format( format: 'Y.m.d' ), // date
@@ -357,16 +363,16 @@ class mu_plugin {
 	private function _format_directory_entry(
 		string $directory,
 		string $size,
-		string $label_css = '',
-		string $data_css = '',
+		string $label_css,
+		string $data_css,
 	):string
 	{
-		return sprintf('<p><span style="%3$s">%2$s</span><br><span style="%4$s">%1$s</span></p>',
+		return sprintf( '<p><span style="%3$s">%2$s</span><br><span style="%4$s">%1$s</span></p>',
 			basename(
-				path: $directory
+				path: $directory,
 			),
 			$this->_reformat_size_format(
-				size: $size
+				size: $size,
 			),
 			$data_css,
 			$label_css,
