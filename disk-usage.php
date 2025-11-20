@@ -60,13 +60,30 @@ class mu_plugin {
 	/**
 	 * Set the operating system name.
 	 *
+	 * @param string $os
+	 *
 	 * @return void
 	 */
-	private function set_os():void
+	public function set_os(
+		string $os = '',
+	):void
 	{
-		$this->os = php_uname(
-			mode: 's',
-		);
+		// autoset the operating system when none is specified.
+		if ( empty( $os ) ) {
+			$this->os = php_uname(
+				mode: 's',
+			);
+		} else {
+			$this->os = $os;
+		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public function get_os():string
+	{
+		return $this->os;
 	}
 
 	/**
@@ -394,7 +411,7 @@ class mu_plugin {
 	{
 		// we can't get the directory in bytes on macOS. see the "du" man page.
 		$du_multiplier = 1024;
-		if ( $this->os == 'Darwin' ) {
+		if ( $this->get_os() == 'Darwin' ) {
 			$du_multiplier = 512;
 		}
 		list ( $amount, $unit ) = explode(

@@ -21,5 +21,18 @@
     },
     "require": {
         "php": "8.*.*"
+    },
+    "require-dev": {
+        "wp-cli/i18n-command": "^2",
+        "yoast/phpunit-polyfills": "^4.0",
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "disk_usage_mu\\": ["tests/"]
+        }
+    },
+    "scripts": {
+        "makepot": "wp i18n make-pot ."
     }
-}
+},

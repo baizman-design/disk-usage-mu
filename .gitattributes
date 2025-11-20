@@ -1,0 +1,57 @@
+# github
+.github export-ignore
+
+# adobe illustrator
+*.ai export-ignore
+
+# adobe photoshop
+*.psd export-ignore
+
+# this file
+.gitattributes export-ignore
+
+# ignored files
+.gitignore export-ignore
+
+# readmes
+README.* export-ignore
+
+# composer configuration
+composer.* export-ignore
+
+# phpcs configuration
+.phpcs.xml.dist export-ignore
+
+# travis ci configuration
+.travis.yml export-ignore
+
+# phpunit configuration
+phpunit.xml export-ignore
+phpunit.xml.dist export-ignore
+
+# webpack config
+webpack.config.js
+
+# phpunit testing directory
+tests export-ignore
+
+# jetbrains ide http client files
+*.http export-ignore
+*.rest export-ignore
+
+# jetbrains ide http client configuration files
+http-client.* export-ignore
+
+# wordpress blocks (custom directory)
+block-src export-ignore
+
+# package.json (npm)
+package.json export-ignore
+
+# makefiles
+[Mm]akefile export-ignore
+*.makefile export-ignore
+
+# sass files
+*.scss export-ignore
+*.sass export-ignore
