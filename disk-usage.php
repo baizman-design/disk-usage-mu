@@ -79,6 +79,8 @@ class mu_plugin {
 	}
 
 	/**
+	 * Get the operating system name.
+	 *
 	 * @return string
 	 */
 	public function get_os():string
@@ -192,31 +194,31 @@ class mu_plugin {
 				'grid-gap' => '20px',
 			];
 			// css formatting.
-			$data_css = [
+			$css_data = [
 				'font-size' => '20px',
 				'font-weight' => 'bold',
 			];
-			$data_css_string = implode( separator: '; ', array: array_map(
+			$css_data_string = implode( separator: '; ', array: array_map(
 					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
 						$property,
 						$value
 					),
-					array_keys( $data_css ),
-					array_values( $data_css ),
+					array_keys( $css_data ),
+					array_values( $css_data ),
 				)
 			);
-			$label_css = [
+			$css_label = [
 				'font-size' => '10px',
 				'text-transform' => 'uppercase',
 				'letter-spacing' => '0.05em',
 			];
-			$label_css_string = implode( separator: '; ', array: array_map(
+			$css_label_string = implode( separator: '; ', array: array_map(
 					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
 						$property,
 						$value
 					),
-					array_keys( $label_css ),
-					array_values( $label_css ),
+					array_keys( $css_label ),
+					array_values( $css_label ),
 				)
 			);
 			$html = sprintf( '<div style="%1$s">',
@@ -236,12 +238,12 @@ class mu_plugin {
 				array_fill(
 					0,
 					count($core_directories),
-					$label_css_string
+					$css_label_string
 				),
 				array_fill(
 					0,
 					count($core_directories),
-					$data_css_string
+					$css_data_string
 				),
 			);
 			if ( $core_directories_formatted ) {
@@ -266,12 +268,12 @@ class mu_plugin {
 				array_fill(
 					0,
 					count($other_directories),
-					$label_css_string
+					$css_label_string
 				),
 				array_fill(
 					0,
 					count($other_directories),
-					$data_css_string
+					$css_data_string
 				),
 			);
 			if ( $other_directories_formatted ) {
@@ -299,8 +301,8 @@ class mu_plugin {
 					size: $total_bytes,
 					decimals: 2,
 				),
-				$data_css_string,
-				$label_css_string,
+				$css_data_string,
+				$css_label_string,
 				__( text: 'total disk usage in', domain: 'disk-usage' ) . ' ' . basename( path: WP_CONTENT_DIR ),
 			);
 			/*
@@ -313,12 +315,12 @@ class mu_plugin {
 			date_default_timezone_set( timezoneId: self::timezone );
 			$now = current_datetime();
 			/** @noinspection HtmlUnknownTarget */
-			$html .= sprintf('<p><small>Last updated at %1$s on %2$s. (<a href="%3$s">refresh</a>)</small></p>',
+			$html .= sprintf( '<p><small>Last updated at %1$s on %2$s. (<a href="%3$s">refresh</a>)</small></p>',
 				$now->format( format: 'G.i' ), // time
 				$now->format( format: 'Y.m.d' ), // date
 				add_query_arg(
 					[$this->get_url_key => 1],
-					admin_url(), // not actually required, here to be explicit.
+					admin_url( path: 'index.php' ), // not actually required, here to be explicit.
 				),
 			);
 			set_transient(
