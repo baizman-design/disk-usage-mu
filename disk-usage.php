@@ -286,11 +286,7 @@ class mu_plugin {
 			}
 			$html .= '</div>';
 			// sum the total.
-			$total_bytes = 0;
-			array_map(
-				callback: function ( $subdirectory_size ) use ( &$total_bytes ) {
-					$total_bytes += $subdirectory_size;
-				},
+			$total_bytes = array_sum(
 				array: $subdirectories_array,
 			);
 			$html .= sprintf('<p><span style="%2$s">%1$s</span><br><span style="%3$s">%4$s</span></p>',
