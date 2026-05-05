@@ -209,7 +209,9 @@ class mu_plugin {
 				'text-transform' => 'uppercase',
 				'letter-spacing' => '0.05em',
 			];
-			$css_label_string = implode( separator: '; ', array: array_map(
+			$css_label_string = implode(
+				separator: '; ',
+				array: array_map(
 					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
 						$property,
 						$value
@@ -219,7 +221,9 @@ class mu_plugin {
 				)
 			);
 			$html = sprintf( '<div style="%1$s">',
-				implode( separator: '; ', array: array_map(
+				implode(
+					separator: '; ',
+					array: array_map(
 					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
 						$property,
 						$value
@@ -285,6 +289,31 @@ class mu_plugin {
 				$html .= $optional_html;
 			}
 			$html .= '</div>';
+			// print total and database usage.
+			$total_extra_css = [
+				'border-top' => '1px dotted #cccccc',
+			];
+			$html .= sprintf( '<div style="%1$s">',
+				implode(
+					separator: '; ',
+					array: array_map(
+					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
+						$property,
+						$value
+					),
+					array_keys( array_merge(
+						$total_extra_css,
+						$meta_box_css,
+						)
+					),
+					array_values( array_merge(
+						$total_extra_css,
+						$meta_box_css,
+						)
+					),
+				)),
+			);
+
 			// sum the total.
 			$total_bytes = array_sum(
 				array: $subdirectories_array,
@@ -298,6 +327,40 @@ class mu_plugin {
 				$css_label_string,
 				__( text: 'total disk usage in', domain: 'disk-usage' ) . ' ' . basename( path: WP_CONTENT_DIR ),
 			);
+			if ( $this->_is_sqlite() ) {
+				# https://github.com/wp-cli/db-command/blob/main/src/DB_Command_SQLite.php#L65
+				if ( defined( constant_name: 'FQDB' ) ) {
+					$db_path = FQDB;
+				} else {
+					$db_file = defined( constant_name: 'DB_FILE' ) ? DB_FILE : '.ht.sqlite';
+					$db_dir  = defined( constant_name: 'FQDBDIR' ) ? FQDBDIR : WP_CONTENT_DIR . '/database';
+					$db_path = rtrim( $db_dir, '/' ) . '/' . ltrim( $db_file, '/' );
+				}
+				$db_bytes = filesize( $db_path );
+				$db_type = 'sqlite';
+			} else {
+				$db_bytes = $GLOBALS['wpdb']->get_var(
+					$GLOBALS['wpdb']->prepare(
+						'SELECT SUM(data_length + index_length) FROM information_schema.TABLES where table_schema = %s GROUP BY table_schema;',
+						DB_NAME
+					)
+				);
+				$db_type = 'mysql';
+			}
+			$db_size_default_wp_format = size_format(
+					 bytes: $db_bytes, decimals: 2,
+				 );
+			$html .= sprintf('<p><span style="%2$s">%1$s</span><br><span style="%3$s">%4$s</span></p>',
+				 strtr(
+					 $db_size_default_wp_format,
+					 [' ' => '', 'B' => ''], // remove space and uppercase "B".
+				 ),
+				$css_data_string,
+				$css_label_string,
+				$db_type . ' ' . __( text: 'database disk usage', domain: 'disk-usage' ),
+			);
+			$html .= '</div>';
+
 			/*
 			$html .= sprintf('<p><span style="%2$s">%1$s</span><br><span style="%3$s">wp-content directory path</span></p>',
 				WP_CONTENT_DIR,
@@ -421,7 +484,38 @@ class mu_plugin {
 		);
 	}
 
+	/**
+	 * Are we running SQLite?
+	 * @link https://github.com/wp-cli/db-command/blob/main/src/DB_Command_SQLite.php#L35
+	 *
+	 * @return bool
+	 */
+	private function _is_sqlite() {
+		// Check if DB_ENGINE constant is defined and set to 'sqlite'.
+		if ( defined( 'DB_ENGINE' ) && 'sqlite' === DB_ENGINE ) {
+			return true;
+		}
+
+		// Check if the SQLite drop-in is loaded by looking for SQLITE_DB_DROPIN_VERSION constant.
+		if ( defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
+			return true;
+		}
+
+		// Check if db.php drop-in exists and contains SQLite markers.
+		$wp_content_dir = defined( constant_name: 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR : ABSPATH . 'wp-content';
+		$db_dropin_path = $wp_content_dir . '/db.php';
+
+		if ( file_exists( $db_dropin_path ) ) {
+			$db_dropin_contents = file_get_contents( $db_dropin_path );
+			if ( false !== $db_dropin_contents && false !== strpos( $db_dropin_contents, 'SQLITE_DB_DROPIN_VERSION' ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }
+
 // decouple from WordPress.
 if ( defined( constant_name: 'ABSPATH' ) ) {
 	mu_plugin::run();
