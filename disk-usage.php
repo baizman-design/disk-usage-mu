@@ -371,7 +371,7 @@ class mu_plugin {
 			$now = current_datetime();
 			/** @noinspection HtmlUnknownTarget */
 			$html .= sprintf( '<p><small>Last updated at %1$s on %2$s. (<a href="%3$s">refresh</a>)</small></p>',
-				$now->format( format: 'G.i' ), // time
+				$now->format( format: 'H.i' ), // time
 				$now->format( format: 'Y.m.d' ), // date
 				add_query_arg(
 					[$this->get_url_key => 1],
