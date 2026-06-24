@@ -196,9 +196,9 @@ class mu_plugin {
 				'font-weight' => 'bold',
 			];
 			$css_data_string = implode( separator: '; ', array: array_map(
-					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
+					fn( string $property, string $value ):string => sprintf( '%1$s: %2$s',
 						$property,
-						$value
+						$value,
 					),
 					array_keys( $css_data ),
 					array_values( $css_data ),
@@ -212,9 +212,9 @@ class mu_plugin {
 			$css_label_string = implode(
 				separator: '; ',
 				array: array_map(
-					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
+					fn( string $property, string $value ):string => sprintf( '%1$s: %2$s',
 						$property,
-						$value
+						$value,
 					),
 					array_keys( $css_label ),
 					array_values( $css_label ),
@@ -224,9 +224,9 @@ class mu_plugin {
 				implode(
 					separator: '; ',
 					array: array_map(
-					fn( string $property, string $value ):string => sprintf('%1$s: %2$s',
+					fn( string $property, string $value ):string => sprintf( '%1$s: %2$s',
 						$property,
-						$value
+						$value,
 					),
 					array_keys( $meta_box_css ),
 					array_values( $meta_box_css ),
@@ -238,12 +238,12 @@ class mu_plugin {
 				array_values( $core_directories ),
 				array_fill(
 					0,
-					count($core_directories),
+					count( $core_directories ),
 					$css_label_string
 				),
 				array_fill(
 					0,
-					count($core_directories),
+					count( $core_directories ),
 					$css_data_string
 				),
 			);
@@ -268,12 +268,12 @@ class mu_plugin {
 				array_values( $other_directories ),
 				array_fill(
 					0,
-					count($other_directories),
+					count( $other_directories ),
 					$css_label_string
 				),
 				array_fill(
 					0,
-					count($other_directories),
+					count( $other_directories ),
 					$css_data_string
 				),
 			);
